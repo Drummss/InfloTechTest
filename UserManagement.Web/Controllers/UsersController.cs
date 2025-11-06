@@ -12,7 +12,7 @@ public class UsersController : Controller
     public UsersController(IUserService userService) => _userService = userService;
 
     [HttpGet]
-    public ViewResult List(bool? isActive)
+    public ViewResult List(bool? isActive = null)
     {
         IEnumerable<User> users;
 

@@ -1,48 +1,90 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.Web.Models.Users;
 using UserManagement.WebMS.Controllers;
 
-namespace UserManagement.Data.Tests;
+namespace UserManagement.Web.Tests;
 
 public class UserControllerTests
 {
-    [Fact]
-    public void List_WhenServiceReturnsUsers_ModelMustContainUsers()
-    {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var controller = CreateController();
-        var users = SetupUsers();
+    private readonly Mock<IUserService> _userService;
 
-        // Act: Invokes the method under test with the arranged parameters.
-        var result = controller.List();
-
-        // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Model
-            .Should().BeOfType<UserListViewModel>()
-            .Which.Items.Should().BeEquivalentTo(users);
-    }
-
-    private User[] SetupUsers(string forename = "Johnny", string surname = "User", string email = "juser@example.com", bool isActive = true)
-    {
-        var users = new[]
+    private readonly List<User> _users =
+    [
+        new()
         {
-            new User
-            {
-                Forename = forename,
-                Surname = surname,
-                Email = email,
-                IsActive = isActive
-            }
-        };
+            Id = 1,
+            Forename = "Johnny",
+            Surname = "User",
+            Email = "juser@example.com",
+            DateOfBirth = new DateTime(1996, 12, 24),
+            IsActive = true,
+        },
+        new()
+        {
+            Id = 2,
+            Forename = "Sam",
+            Surname = "User",
+            Email = "suser@example.com",
+            DateOfBirth = new DateTime(1999, 4, 3),
+            IsActive = true,
+        },
+        new()
+        {
+            Id = 3,
+            Forename = "Katie",
+            Surname = "User",
+            Email = "kuser@example.com",
+            IsActive = false,
+        },
+    ];
+
+    public UserControllerTests()
+    {
+        _userService = new Mock<IUserService>();
 
         _userService
             .Setup(s => s.GetAll())
-            .Returns(users);
+            .Returns(_users);
 
-        return users;
+        _userService
+            .Setup(s => s.FilterByActive(true))
+            .Returns(_users.Where(u => u.IsActive));
+
+        _userService
+            .Setup(s => s.FilterByActive(false))
+            .Returns(_users.Where(u => !u.IsActive));
     }
 
-    private readonly Mock<IUserService> _userService = new();
+    [Fact]
+    public void ListModelContainsUsersTest()
+    {
+        var controller = CreateController();
+        var result = controller.List();
+
+        result.Model.Should().BeOfType<UserListViewModel>().Which.Items.Should().BeEquivalentTo(_users);
+    }
+
+    [Fact]
+    public void ListModelFiltersByActiveTest()
+    {
+        var controller = CreateController();
+        var result = controller.List(true);
+
+        result.Model.Should().BeOfType<UserListViewModel>().Which.Items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void ListModelFiltersByInactiveTest()
+    {
+        var controller = CreateController();
+        var result = controller.List(false);
+
+        result.Model.Should().BeOfType<UserListViewModel>().Which.Items.Should().HaveCount(1);
+    }
+
     private UsersController CreateController() => new(_userService.Object);
 }
