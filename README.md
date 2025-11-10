@@ -32,7 +32,7 @@ I started by completing the filtering functionality and then updating the User m
 
 ### UserManagement.API
 I started here, creating an API for the front-end to consume. Something I that was part of workshopping at my previous work place was using the `TestContainers` library to do integration testing.
-The implementation here is somewhat simple, but I do believe that testing a running application, against real services (SQL Server only in this case) is invaluable.
+The implementation here is somewhat simple, but I do believe that testing a running application, against real-ish services (SQL Server only in this case) is invaluable.
 
 Better error handling and logging would be needed to make this API production ready. Typically, I would want to have a telemetry stack running that I could throw logs and analytics to (Prometheus/OpenTelemetry/Loki and Grafana).
 
@@ -43,7 +43,7 @@ There are many things to be desired in this project, such as UI/UX improvements 
 
 ### UserManagement.Data
 This project was refactored to use a real database, features migrations, and I implemented an async EntityRepository pattern.
-This can be extended further to include a UnitOfWork pattern. About one of the tasks I didn't manage to get to - to add logging for user actions, this would be a great way to log actions that are intended to create changes within the database.
+This can be extended further to include a UnitOfWork pattern. For one of the tasks I didn't manage to get to - to add logging for user actions, this would be a great way to log actions that are intended to create changes within the database.
 
 ### TDLR (might have missed some changes);
 - New API service for managing users.
