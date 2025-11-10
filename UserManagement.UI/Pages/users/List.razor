@@ -1,0 +1,91 @@
+﻿@page "/users"
+@using UserManagement.UI.Models
+@inject UserHttpClient UserHttpClient
+
+<h2>User List</h2>
+
+@if (_users.Any())
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Forename</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Date of Birth</th>
+            <th>Account Active</th>
+            <th style="width: 1px;"></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (User user in _users)
+        {
+            <tr>
+                <td>
+                    @user.Id
+                </td>
+                <td>
+                    @user.Forename
+                </td>
+                <td>
+                    @user.Surname
+                </td>
+                <td>
+                    @user.Email
+                </td>
+                <td>
+                    @(user.DateOfBirth.HasValue ? user.DateOfBirth!.Value.ToString("dd/MM/yyyy") : "Not Set")
+                </td>
+                <td>
+                    @(user.IsActive ? "Yes" : "No")
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false" id="btnToggleActions">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="btnToggleActions">
+                            <li><a class="dropdown-item" href="/users/@user.Id">View</a></li>
+                            <li><a class="dropdown-item" href="/users/@user.Id/edit">Edit</a></li>
+                            <li><a class="dropdown-item" href="/users/@user.Id/delete">Delete</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div>
+        <div class="btn-group" role="group">
+            <a href="/users" class="btn btn-default">Show All</a>
+            <a href="/users?IsActive=true" class="btn btn-default">Active Only</a>
+            <a href="/users?IsActive=false" class="btn btn-default">Non Active</a>
+        </div>
+
+        <a href="/users/create" class="btn btn-primary float-end">
+            Add User
+        </a>
+    </div>
+}
+else
+{
+    <div>
+        <p>No users found.</p>
+
+        <a href="/users/create" class="btn btn-primary">Create User</a>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery] public bool? IsActive { get; set; }
+    private List<User> _users = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _users = (await UserHttpClient.GetUsersAsync(IsActive)).ToList();
+    }
+
+}

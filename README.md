@@ -1,65 +1,64 @@
 # User Management Technical Exercise
 
-The exercise is an ASP.NET Core web application backed by Entity Framework Core, which faciliates management of some fictional users.
-We recommend that you use [Visual Studio (Community Edition)](https://visualstudio.microsoft.com/downloads) or [Visual Studio Code](https://code.visualstudio.com/Download) to run and modify the application. 
+## Introduction
+This is the result of my work on the this technical test. The exercise was relatively open-ended in that it had many ways to be approached.
+Since this is an already started project, my understanding is that there is importance on showing an ability to work on an already existing codebase.
+Ultimately, after the first couple of standard tasks, I wanted to focus on some of the more advanced tasks - which ended up with a lot of code being refactored.
 
-**The application uses an in-memory database, so changes will not be persisted between executions.**
+The choice between addressing or creating tech debt can be tricky to make at times. If time was more in my favour, I would have like to make a point in writing in "planned" tech debt and then overhauled from there.
 
-## The Exercise
-Complete as many of the tasks below as you feel comfortable with. These are split into 4 levels of difficulty 
-* **Standard** - Functionality that is common when working as a web developer
-* **Advanced** - Slightly more technical tasks and problem solving
-* **Expert** - Tasks with a higher level of problem solving and architecture needed
-* **Platform** - Tasks with a focus on infrastructure and scaleability, rather than application development.
+## Setup
+### Configuration the project
+You will need to create a `appsettings.json` file in the `UserManagement.API` project with the following content:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "<Your SQL Server Connection String>"
+  }
+}
+```
+> I ran my SQL Server instance using Docker.
 
-### 1. Filters Section (Standard)
+### Running the project
+You should be able to run the projects directly from Visual Studio or using the `dotnet` CLI (`dotnet run`). There is no API mocks for the front-end currently, so I recommend running `UserManagement.Api` first, and then running `UserManagement.UI`.
 
-The users page contains 3 buttons below the user listing - **Show All**, **Active Only** and **Non Active**. Show All has already been implemented. Implement the remaining buttons using the following logic:
-* Active Only – This should show only users where their `IsActive` property is set to `true`
-* Non Active – This should show only users where their `IsActive` property is set to `false`
+### Testing the project
+You can run the `UserManagement.Data.Tests` without further need for configuration.
 
-### 2. User Model Properties (Standard)
+To run the `UserManagement.Api.IntergrationTests`, you will need to have Docker running on your machine as it uses TestContainers to automatically spin up a SQL Server instance for testing.
 
-Add a new property to the `User` class in the system called `DateOfBirth` which is to be used and displayed in relevant sections of the app.
+## My Changes
+I started by completing the filtering functionality and then updating the User model to include DateOfBirth - including displaying it in the UI. From there, I started work on refactoring the application.
 
-### 3. Actions Section (Standard)
+### UserManagement.API
+I started here, creating an API for the front-end to consume. Something I that was part of workshopping at my previous work place was using the `TestContainers` library to do integration testing.
+The implementation here is somewhat simple, but I do believe that testing a running application, against real services (SQL Server only in this case) is invaluable.
 
-Create the code and UI flows for the following actions
-* **Add** – A screen that allows you to create a new user and return to the list
-* **View** - A screen that displays the information about a user
-* **Edit** – A screen that allows you to edit a selected user from the list  
-* **Delete** – A screen that allows you to delete a selected user from the list
+Better error handling and logging would be needed to make this API production ready. Typically, I would want to have a telemetry stack running that I could throw logs and analytics to (Prometheus/OpenTelemetry/Loki and Grafana).
 
-Each of these screens should contain appropriate data validation, which is communicated to the end user.
+### UserManagement.UI
+Most of my "modern" front-end experience has been working with React (or JSX style frameworks). However, I wanted to try giving Blazor a go for this project as it was your preferred framework.
 
-### 4. Data Logging (Advanced)
+There are many things to be desired in this project, such as UI/UX improvements that would make the website look and feel nicer, along with accessibility and responsiveness ideally being at the core of its design. For the most part, it is derivative of the original `UserManagement.Web` project.
 
-Extend the system to capture log information regarding primary actions performed on each user in the app.
-* In the **View** screen there should be a list of all actions that have been performed against that user. 
-* There should be a new **Logs** page, containing a list of log entries across the application.
-* In the Logs page, the user should be able to click into each entry to see more detail about it.
-* In the Logs page, think about how you can provide a good user experience - even when there are many log entries.
+### UserManagement.Data
+This project was refactored to use a real database, features migrations, and I implemented an async EntityRepository pattern.
+This can be extended further to include a UnitOfWork pattern. About one of the tasks I didn't manage to get to - to add logging for user actions, this would be a great way to log actions that are intended to create changes within the database.
 
-### 5. Extend the Application (Expert)
+### TDLR (might have missed some changes);
+- New API service for managing users.
+- Integration tests using TestContainers for the API service.
+- New UI project that uses Blazor.
+- Changed UserManagement.Data to use a real database.
+- Added migrations.
+- Added helper scripts for setting up the database.
+- Changed to async repository pattern.
+- Added DateOfBirth to User model.
+- Implemented filtering functionality.
+- Implemented Add, View, Edit, Delete functionality in the UI.
+- Refactored code to be more maintainable and extensible.
 
-Make a significant architectural change that improves the application.
-Structurally, the user management application is very simple, and there are many ways it can be made more maintainable, scalable or testable.
-Some ideas are:
-* Re-implement the UI using a client side framework connecting to an API. Use of Blazor is preferred, but if you are more familiar with other frameworks, feel free to use them.
-* Update the data access layer to support asynchronous operations.
-* Implement authentication and login based on the users being stored.
-* Implement bundling of static assets.
-* Update the data access layer to use a real database, and implement database schema migrations.
+## Final Words
+There is much more I would have wanted to do, such as front-end tests, infrastructural as code, CI/CD pipelines, logging, error handling, prettier/better UI code, etc.
 
-### 6. Future-Proof the Application (Platform)
-
-Add additional layers to the application that will ensure that it is scaleable with many users or developers. For example:
-* Add CI pipelines to run tests and build the application.
-* Add CD pipelines to deploy the application to cloud infrastructure.
-* Add IaC to support easy deployment to new environments.
-* Introduce a message bus and/or worker to handle long-running operations.
-
-## Additional Notes
-
-* Please feel free to change or refactor any code that has been supplied within the solution and think about clean maintainable code and architecture when extending the project.
-* If any additional packages, tools or setup are required to run your completed version, please document these thoroughly.
+Thank you for taking the time to review my project!

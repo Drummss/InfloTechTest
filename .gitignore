@@ -247,3 +247,4 @@ ModelManifest.xml
 # Inflo Custom Ignores
 **/*.js.map
 .idea
+/UserManagement.Api/appsettings.json

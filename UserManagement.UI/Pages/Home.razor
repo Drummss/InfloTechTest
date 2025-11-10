@@ -1,0 +1,17 @@
+﻿@page "/"
+@using Markdig
+
+<PageTitle>Home</PageTitle>
+
+@((MarkupString) Markdown.ToHtml(_readMeContent))
+
+@code
+{
+    private string _readMeContent = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        HttpClient httpClient = new();
+        _readMeContent = await httpClient.GetStringAsync("https://raw.githubusercontent.com/Drummss/InfloTechTest/refs/heads/main/README.md");
+    }
+}

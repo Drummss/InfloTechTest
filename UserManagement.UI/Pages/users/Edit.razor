@@ -1,0 +1,78 @@
+﻿@page "/users/{UserId:long}/edit"
+
+@using UserManagement.UI.DTOs
+@using UserManagement.UI.Validators
+@using Blazilla
+@using UserManagement.UI.Models
+
+@inject UserHttpClient UserHttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Edit</h3>
+
+<EditForm Model="@User" OnValidSubmit="@OnValidSubmit">
+    <FluentValidator Validator="@_validator" />
+    <ValidationSummary/>
+
+    <div class="mb-3">
+        <label for="forenameInput" class="form-label" required>Forename</label>
+        <InputText id="forenameInput" @bind-Value="User.Forename" class="form-control"/>
+        <ValidationMessage For="() => User.Forename"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="surnameInput" class="form-label" required>Surname</label>
+        <InputText id="surnameInput" @bind-Value="User.Surname" class="form-control" />
+        <ValidationMessage For="() => User.Surname"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="emailInput" class="form-label" required>Email</label>
+        <InputText id="emailInput" @bind-Value="User.Email" class="form-control"/>
+        <ValidationMessage For="() => User.Email"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="dobInput" class="form-label" required>Date of Birth</label>
+        <InputDate id="dobInput" @bind-Value="User.DateOfBirth" class="form-control"/>
+        <ValidationMessage For="() => User.DateOfBirth"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="isActiveInput" class="form-label" required>Account Active</label>
+        <InputCheckbox id="isActiveInput" @bind-Value="User.IsActive" class="form-check-input"/>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="/users" class="btn btn-outline-danger">Cancel</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public long UserId { get; set; }
+    public readonly UpdateUserRequestModel User = new();
+    private readonly UpdateUserValidator _validator = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        User? existingUser =  await UserHttpClient.GetUserByIdAsync(UserId);
+
+        if(existingUser is null)
+        {
+            NavigationManager.NavigateTo("/users");
+            return;
+        }
+
+        User.Forename = existingUser.Forename;
+        User.Surname = existingUser.Surname;
+        User.Email = existingUser.Email;
+        User.DateOfBirth = existingUser.DateOfBirth;
+    }
+
+    private async Task OnValidSubmit(EditContext editContext)
+    {
+        await UserHttpClient.UpdateUserAsync(UserId, User);
+
+        NavigationManager.NavigateTo("/users");
+    }
+}

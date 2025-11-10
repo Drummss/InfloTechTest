@@ -1,0 +1,52 @@
+﻿@page "/users/create"
+@using UserManagement.UI.DTOs
+@using Blazilla
+@using UserManagement.UI.Validators
+@inject UserHttpClient UserHttpClient
+@inject NavigationManager NavigationManager
+
+<h2>Create New User</h2>
+
+<EditForm Model="@User" OnValidSubmit="@OnValidSubmit">
+    <FluentValidator Validator="@_validator" />
+    <ValidationSummary/>
+
+    <div class="mb-3">
+        <label for="forenameInput" class="form-label" required>Forename</label>
+        <InputText id="forenameInput" @bind-Value="User.Forename" class="form-control"/>
+        <ValidationMessage For="() => User.Forename"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="surnameInput" class="form-label" required>Surname</label>
+        <InputText id="surnameInput" @bind-Value="User.Surname" class="form-control" />
+        <ValidationMessage For="() => User.Surname"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="emailInput" class="form-label" required>Email</label>
+        <InputText id="emailInput" @bind-Value="User.Email" class="form-control"/>
+        <ValidationMessage For="() => User.Email"/>
+    </div>
+
+    <div class="mb-3">
+        <label for="dobInput" class="form-label" required>Date of Birth</label>
+        <InputDate id="dobInput" @bind-Value="User.DateOfBirth" class="form-control"/>
+        <ValidationMessage For="() => User.DateOfBirth"/>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create User</button>
+</EditForm>
+
+@code
+{
+    private readonly CreateUserValidator _validator = new();
+    public readonly CreateUserRequestModel User = new();
+
+    private async Task OnValidSubmit(EditContext editContext)
+    {
+        await UserHttpClient.CreateUserAsync(User);
+
+        NavigationManager.NavigateTo("/users");
+    }
+}

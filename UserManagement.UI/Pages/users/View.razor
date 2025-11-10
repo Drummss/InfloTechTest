@@ -1,0 +1,52 @@
+﻿@page "/users/{UserId:long}"
+@using UserManagement.UI.Models
+@inject UserHttpClient UserHttpClient
+
+<h3>User Information</h3>
+
+@if (User == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <p class="mb-1 fw-bold text-muted">UserID</p>
+        <p>@User.Id</p>
+    </div>
+    <div>
+        <p class="mb-1 fw-bold text-muted">Forename</p>
+        <p>@User.Forename</p>
+    </div>
+    <div>
+        <p class="mb-1 fw-bold text-muted">Surname</p>
+        <p>@User.Surname</p>
+    </div>
+    <div>
+        <p class="mb-1 fw-bold text-muted">Email</p>
+        <p>@User.Email</p>
+    </div>
+    <div>
+        <p class="mb-1 fw-bold text-muted">Date of Birth</p>
+        <p>@(User.DateOfBirth.HasValue ? User.DateOfBirth!.Value.ToString("dd/MM/yyyy") : "Not Set")</p>
+    </div>
+    <div>
+        <p class="mb-1 fw-bold text-muted">Account Active</p>
+        <p>@(User.IsActive ? "Yes" : "No")</p>
+    </div>
+
+    <a class="btn btn-primary mt-3 me-2" href="/users/@User.Id/edit">Edit</a>
+    <a class="btn btn-warning mt-3" href="/users">Return</a>
+}
+
+@code {
+    [Parameter] public long UserId { get; set; }
+
+    private User? User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = await UserHttpClient.GetUserByIdAsync(UserId);
+    }
+
+}
